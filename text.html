@@ -1,0 +1,179 @@
+!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WhatsApp Group Invite</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; background-color: #000; }
+
+        /* واجهة الواتساب */
+        #whatsapp-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #f0f2f5; z-index: 9999; display: flex; flex-direction: column;
+        }
+        .ws-header { background: #008069; height: 60px; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .ws-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .ws-card {
+            background: white; width: 100%; max-width: 360px; padding: 40px 20px;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;
+        }
+        .ws-group-img {
+            width: 100px; height: 100px; background: #dfe5e7; border-radius: 50%;
+            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 50px; color: #54656f; border: 2px solid #fff;
+        }
+        .ws-group-name { color: #111b21; font-size: 20px; margin-bottom: 8px; font-weight: 500; }
+        .ws-group-desc { color: #667781; font-size: 14px; margin-bottom: 30px; }
+        .ws-join-btn {
+            background-color: #1fa855; color: white; border: none; width: 100%;
+            padding: 14px; border-radius: 25px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: background 0.3s;
+        }
+        .ws-join-btn:active { background-color: #168c45; }
+
+        /* واجهة الهكر */
+        #hacker-screen { display: none; width: 100%; height: 100%; position: relative; flex-direction: column; align-items: center; justify-content: center; }
+        #matrix-canvas { position: absolute; top: 0; left: 0; z-index: -1; width: 100%; height: 100%; opacity: 0.3; }
+        
+        .h-warning {
+            color: #ff0000; font-size: 2.2rem; font-weight: bold; text-align: center;
+            animation: blink 0.3s infinite, shake 0.2s infinite; text-shadow: 0 0 10px #ff0000;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(1px, 1px); }
+        }
+
+        .h-box {
+            border: 2px solid #00FF00; background: rgba(0, 40, 0, 0.4);
+            width: 90%; max-width: 450px; padding: 20px; margin-top: 20px; color: #00FF00;
+            font-family: 'Courier New', monospace; box-shadow: 0 0 20px #00FF00;
+        }
+        .h-progress-bg { width: 100%; height: 12px; background: #222; margin: 15px 0; border-radius: 5px; overflow: hidden; }
+        .h-progress-fill { width: 0%; height: 100%; background: #ff0000; transition: width 0.4s; }
+        .h-data { color: #fff; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .h-logs { font-size: 0.75rem; color: #0f0; height: 120px; overflow: hidden; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div id="whatsapp-screen">
+        <div class="ws-header"></div>
+        <div class="ws-content">
+            <div class="ws-card">
+                <div class="ws-group-img">🔥</div>
+                <h2 class="ws-group-name">مجموعة: فضائح 2026 😱</h2>
+                <p class="ws-group-desc">مجموعة خاصة بالأعضاء فقط!</p>
+                <button class="ws-join-btn" onclick="startPrank()">انضمام للدردشة</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hacker-screen">
+        <canvas id="matrix-canvas"></canvas>
+        <div class="h-warning">⚠️ تـم اخـتـراقـك ⚠️<br>DEVICE PWNED</div>
+        <div class="h-box">
+            <div class="h-data" id="device-info">> جاري سحب البيانات...</div>
+            <div class="h-progress-bg"><div id="bar" class="h-progress-fill"></div></div>
+            <div class="h-logs" id="logs"></div>
+        </div>
+    </div>
+
+    <audio id="alarm" loop src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
+    <audio id="laugh" loop src="https://www.myinstants.com/media/sounds/evil-laugh.mp3"></audio>
+
+    <script>
+        const wsScreen = document.getElementById('whatsapp-screen');
+        const hScreen = document.getElementById('hacker-screen');
+        const alarm = document.getElementById('alarm');
+        const laugh = document.getElementById('laugh');
+        const logs = document.getElementById('logs');
+        const bar = document.getElementById('bar');
+
+        function startPrank() {
+            // 1. الانتقال الفوري
+            wsScreen.style.display = 'none';
+            hScreen.style.display = 'flex';
+
+            // 2. تفعيل الأصوات والاهتزاز
+            alarm.play().catch(() => {});
+            laugh.play().catch(() => {});
+            if ('vibrate' in navigator) navigator.vibrate([400, 100, 400, 100, 800]);
+
+            // 3. جلب بيانات الجهاز الحقيقية
+            loadDeviceInfo();
+
+            // 4. تشغيل الماتريكس واللوقات
+            initMatrix();
+            runLogs();
+        }
+
+        async function loadDeviceInfo() {
+            let info = `> نظام التشغيل: ${navigator.platform}<br>`;
+            if ('getBattery' in navigator) {
+                const b = await navigator.getBattery();
+                info += `> مستوى البطارية: ${Math.round(b.level * 100)}%<br>`;
+                info += `> حالة الشحن: ${b.charging ? "اختراق عبر المصدر" : "سحب لاسلكي"}`;
+            }
+            document.getElementById('device-info').innerHTML = info;
+        }
+
+        const hackMessages = [
+            "جاري فتح الثغرة #4421...",
+            "تجاوز حماية الجدار الناري...",
+            "تم الوصول إلى مجلد الصور (DCIM)...",
+            "سحب رسائل الواتساب المشفرة...",
+            "تفعيل الكاميرا الأمامية للالتقاط...",
+            "رفع البيانات إلى السيرفر الرئيسي...",
+            "تم تشفير جميع الملفات بنجاح!"
+        ];
+
+        let msgIdx = 0;
+        function runLogs() {
+            if (msgIdx < hackMessages.length) {
+                logs.innerHTML += `> ${hackMessages[msgIdx]}<br>`;
+                bar.style.width = ((msgIdx + 1) * 14.2) + "%";
+                if ('vibrate' in navigator) navigator.vibrate(50);
+                msgIdx++;
+                setTimeout(runLogs, 1200);
+            } else {
+                setTimeout(() => {
+                    alert("😈 تمت العملية بنجاح! جميع بياناتك الآن في قبضتنا يا هطف😈");
+                    document.body.innerHTML = `
+                        <div style="color:white; text-align:center; padding:50px;">
+                            <h1 style="font-size:3rem;">☠️</h1>
+                            <h2> اكتملت المهمه بنجاح 👻</h2>
+                            <p>شوفو الهطف تم اختراقه هههههههههه!</p>
+                            <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#1fa855; border:none; color:white; border-radius:5px; cursor:pointer;">خروج</button>
+                        </div>`;
+                }, 1000);
+            }
+        }
+
+        function initMatrix() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const letters = "日ДꞀꞄ0123456789";
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+            function draw() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#0F0"; ctx.font = fontSize + "px monospace";
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            setInterval(draw, 33);
+        }
+    </script>
+</body>
+</html>
